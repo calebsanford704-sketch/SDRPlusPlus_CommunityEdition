@@ -1,5 +1,5 @@
 name: Windows Build (Release)
-on:
+ on:
  workflow_dispatch:
  jobs:
  build:
