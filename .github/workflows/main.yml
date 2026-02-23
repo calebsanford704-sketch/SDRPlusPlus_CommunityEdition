@@ -1,0 +1,42 @@
+name: Windows Build (Release)
+on:
+ workflow_dispatch:
+jobs:
+ build:
+ runs-on: windows-latest
+ steps:
+ - name: Checkout
+ uses: actions/checkout@v4
+ - name: Configure (CMake)
+ run: |
+ mkdir build
+ cd build
+ cmake .. -G 
+"
+Visual Studio 17 2022
+"
+ -A x64
+ - name: Build (Release)
+ run: |
+ cd build
+ cmake --build . --config Release
+ - name: Collect scanner.dll
+ shell: pwsh
+ run: |
+ New-Item -ItemType Directory -Force -Path out | Out-Null
+ $dll = Get-ChildItem -Path build -Recurse -Filter scanner.dll -ErrorAction SilentlyContinue | Select-Object -First 1
+ if (-not $dll) { throw 
+"
+scanner.dll not found in build output
+"
+ }
+ Copy-Item $dll.FullName -Destination out\scanner.dll -Force
+ Write-Host 
+"
+Copied: $($dll.FullName)
+"
+ - name: Upload artifact (scanner.dll)
+ uses: actions/upload-artifact@v4
+ with:
+ name: scanner-dll
+ path: out/scanner.dll
