@@ -17,10 +17,14 @@ jobs:
           cd build
           cmake .. -G "Visual Studio 17 2022" -A x64
 
-      - name: Build (Release)
-        run: |
-          cd build
-          cmake --build . --config Release
+      - name: Build scanner only (Release)
+  shell: pwsh
+  run: |
+    cd build
+    # Build only the scanner module project to avoid optional hardware SDKs (HydraSDR, etc.)
+    $sln = Get-ChildItem -Filter *.sln | Select-Object -First 1
+    if (-not $sln) { throw "No .sln found in build folder" }
+    & msbuild $sln.FullName /m /p:Configuration=Release /t:scanner
 
       - name: Collect scanner.dll
         shell: pwsh
